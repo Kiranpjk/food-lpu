@@ -1,0 +1,15 @@
+{
+  "cli": { "version": ">= 5.0.0", "appVersionSource": "remote" },
+  "build": {
+    "apk": {
+      "android": { "buildType": "apk" },
+      "channel": "production"
+    },
+    "production": {
+      "channel": "production"
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
