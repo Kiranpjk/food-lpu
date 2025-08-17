@@ -141,7 +141,7 @@ export default function MealScanScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#000' },
+  safeArea: { flex: 1, backgroundColor: '#f0f0f0' }, // Universal grey safe area
   container: { flex: 1, backgroundColor: '#000', position: 'relative' },
   cameraShell: { flex: 1, overflow: 'hidden' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, backgroundColor: '#000' },

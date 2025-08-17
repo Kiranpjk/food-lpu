@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Image, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Font } from '../constants/Typography';
 
 export default function TopBar({ onMenuPress, onNotificationPress, notificationCount }) {
@@ -14,59 +13,61 @@ export default function TopBar({ onMenuPress, onNotificationPress, notificationC
         barStyle="dark-content" // dark icons/text in status bar
       />
 
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <View style={styles.inner}>
+      <View style={styles.topBar}>
 
-          {/* Menu Button */}
-          <TouchableOpacity onPress={onMenuPress}>
-            <Ionicons name="menu" size={28} color="#11111" />
-          </TouchableOpacity>
+        {/* Menu Button */}
+        <TouchableOpacity onPress={onMenuPress}>
+          <Image 
+            source={require('../assets/images/menu.png')} 
+            style={styles.menuIcon} 
+          />
+        </TouchableOpacity>
 
-          {/* Heading */}
-          <Text style={styles.title}>Dashboard</Text>
+        {/* Heading */}
+        <Text style={styles.title}>Dashboard</Text>
 
-          {/* Notification Icon with Badge */}
-          <TouchableOpacity style={styles.notificationWrapper} onPress={onNotificationPress}>
-            <Ionicons name="notifications-outline" size={28} color="#000" />
-            {notificationCount > 0 && (
-              <LinearGradient 
-                colors={["#e47668", "#e59769", "#ffdb79"]} 
-                start={{x:0,y:0}} 
-                end={{x:1,y:0}} 
-                style={styles.badge}
-              >
-                <Text style={styles.badgeText}>{notificationCount}</Text>
-              </LinearGradient>
-            )}
-          </TouchableOpacity>
+        {/* Notification Icon with Badge */}
+        <TouchableOpacity style={styles.notificationWrapper} onPress={onNotificationPress}>
+          <Ionicons name="notifications-outline" size={28} color="#000" />
+          {notificationCount > 0 && (
+            <LinearGradient 
+              colors={["#e47668", "#e59769", "#ffdb79"]} 
+              start={{x:0,y:0}} 
+              end={{x:1,y:0}} 
+              style={styles.badge}
+            >
+              <Text style={styles.badgeText}>{notificationCount}</Text>
+            </LinearGradient>
+          )}
+        </TouchableOpacity>
 
-        </View>
-      </SafeAreaView>
+      </View>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    backgroundColor: '#fff',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 2,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#ddd'
-  },
-  inner: {
+  topBar: {
     height: 60,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 15
+    paddingHorizontal: 15,
+    backgroundColor: '#fff',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 3,
+    zIndex: 1000
   },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: Font.bold
+  },
+  menuIcon: {
+    width: 40,
+    height: 40
   },
   notificationWrapper: {
     position: 'relative',

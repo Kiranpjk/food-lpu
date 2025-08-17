@@ -3,6 +3,7 @@ import { ResizeMode, Video } from 'expo-av';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Dimensions, Image, PanResponder, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Font } from '../constants/Typography';
 import MessCouponScreen from './HostelMessScanner';
 
@@ -39,6 +40,9 @@ export default function ScanSuccessScreen() {
 	// State to control sticky header visibility - start with true to show at top
 	const [showStickyHeader, setShowStickyHeader] = useState(true);
 
+	// Timer state for 30-second countdown
+	const [timeRemaining, setTimeRemaining] = useState(30);
+
 	// Capture timestamp once when opened (unless provided)
 	const now = useMemo(() => new Date(), []);
 	const dateStr = now.toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' });
@@ -65,6 +69,19 @@ export default function ScanSuccessScreen() {
 			translateY.removeListener(listener);
 		};
 	}, [translateY, screenHeight, showStickyHeader]);
+
+	// Timer countdown effect30
+	useEffect(() => {
+		if (timeRemaining > 0) {
+			const timer = setTimeout(() => {
+				setTimeRemaining(timeRemaining - 1);
+			}, 1000);
+			return () => clearTimeout(timer);
+		} else {
+			// Auto-close when timer reaches 0
+			router.back();
+		}
+	}, [timeRemaining, router]);
 
 	// Pan responder for dragging
 	const panResponder = useRef(
@@ -108,10 +125,11 @@ export default function ScanSuccessScreen() {
 	).current;
 
 	return (
-		<View style={styles.overlayContainer}>
-			{/* Background - HostelMessScanner page will be visible here */}
-			<MessCouponScreen />
-			<View style={styles.backgroundDimmer} />
+		<SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
+			<View style={{ flex: 1 }}>
+				{/* Background - HostelMessScanner page will be visible here */}
+				<MessCouponScreen />
+				<View style={styles.backgroundDimmer} />
 			
 			{/* Draggable content area - entire area is draggable */}
 			<Animated.View 
@@ -170,6 +188,10 @@ export default function ScanSuccessScreen() {
 				>
 					<View style={styles.bodyWrapper}>
 						<View style={styles.card}>
+							{/* Timer in top right corner */}
+							<View style={styles.timerCorner}>
+								<Text style={styles.timerText}>{timeRemaining}</Text>
+							</View>
 							<View style={styles.topRow}>
 								<View style={styles.avatarOutline}>
 									<Image source={myPhoto} style={styles.avatar} />
@@ -235,30 +257,31 @@ export default function ScanSuccessScreen() {
 					</View>
 				</ScrollView>
 			</Animated.View>
-		</View>
+			</View>
+		</SafeAreaView>
 	);
 }
 
 const styles = StyleSheet.create({
-	overlayContainer: { flex: 1, position: 'relative' },
 	backgroundDimmer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.2)' },
 	
 	// Movable header inside draggable content
 	movableHeader: { backgroundColor: '#323232' },
 	safeAreaBlackOverlay: { 
 		position: 'absolute', 
-		top: 0, 
+		top: -20, 
 		left: 0, 
 		right: 0, 
-		height: 20, 
+		height: 40, 
 		backgroundColor: '#000000',
 		zIndex: 1,
 		alignItems: 'center',
-		justifyContent: 'center'
+		justifyContent: 'center',
+		paddingBottom: 5
 	},
 	draggableContent: { position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: '#FFFFFF', borderTopLeftRadius: 0, borderTopRightRadius: 10, elevation: 10, shadowColor: '#000', shadowOpacity: 0.25, shadowOffset: { width: 0, height: -5 }, shadowRadius: 10 },
 	dragHandle: { alignItems: 'center', paddingVertical: 0, paddingHorizontal: 0, backgroundColor: 'transparent', borderTopLeftRadius: 0, borderTopRightRadius: 0 },
-	dragBar: { width: 40, height: 6, backgroundColor: 'grey', borderRadius: 10,marginTop:15,marginBottom: 5 },
+	dragBar: { width: 40, height: 6, backgroundColor: '#ffffff', borderRadius: 10, marginTop: 15, marginBottom: 5 },
 	scrollableArea: { flex: 1 },
 	titleContainer: { flex: 1, alignItems: 'center' },
 	headerBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 10, paddingTop: 15, paddingBottom: 8, backgroundColor: '#323232', elevation: 8, shadowColor: '#000', shadowOpacity: 0.3, shadowOffset: { width: 0, height: 4 }, shadowRadius: 8 },
@@ -266,6 +289,9 @@ const styles = StyleSheet.create({
 	headerIconBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.12)' },
 	headerClosePlain: { paddingHorizontal: 4, paddingVertical: 4 },
 	headerTitle: { fontSize: 22, color: '#fff', letterSpacing: 0.5, fontFamily: Font.bold },
+	timerText: { fontSize: 14, color: '#fff', fontFamily: Font.bold, backgroundColor: '#6', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, overflow: 'hidden' },
+	timerCorner: { position: 'absolute', top: 12, right: 12, zIndex: 10 },
+	mealTimerRow: { flexDirection: 'row', alignItems: 'center' },
 	bodyWrapper: { alignItems: 'center', justifyContent: 'flex-start', backgroundColor: '#FFFFFF', paddingTop: 20 },
 	card: { width: '92%', backgroundColor: '#ffffff', borderRadius: 22, padding: 20, marginTop: 12, elevation: 26, shadowColor: '#000', shadowOpacity: 0.48, shadowOffset: { width: 0, height: 16 }, shadowRadius: 36, borderWidth: 1.5, borderColor: '#bcbebd' },
 	topRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6 },

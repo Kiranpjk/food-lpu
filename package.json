@@ -1,5 +1,5 @@
 {
-  "name": "myapp",
+  "name": "ftouch",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
@@ -19,6 +19,7 @@
     "@react-navigation/bottom-tabs": "^7.4.6",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.17",
+    "@types/pg": "^8.15.5",
     "expo": "~53.0.20",
     "expo-av": "^15.1.7",
     "expo-blur": "~14.1.5",
@@ -36,6 +37,7 @@
     "expo-system-ui": "~5.0.10",
     "expo-updates": "~0.28.17",
     "expo-web-browser": "~14.2.0",
+    "pg": "^8.16.3",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.5",

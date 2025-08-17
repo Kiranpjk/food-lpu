@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "MyApp",
-    "slug": "myapp",
+    "name": "Ftouch",
+    "slug": "ftouch",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "ftouch",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
     "android": {
-      "package": "com.yourname.myapp",
+      "package": "com.yourname.ftouch",
       "versionCode": 1,
       "edgeToEdgeEnabled": true,
       "adaptiveIcon": {

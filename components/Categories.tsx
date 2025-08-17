@@ -6,14 +6,14 @@ import { Font } from '../constants/Typography';
 import CategoryItem from './CategoryItem';
 
 const categoriesData = [
-  { id: '1', icon: 'campaign', label: 'Announce', badgeCount: 10 },
-  { id: '2', icon: 'checklist', label: 'Attendance' },
-  { id: '3', icon: 'bar-chart', label: 'Results' },
-  { id: '4', icon: 'menu-book', label: 'Library', badgeCount: 2 },
-  { id: '5', icon: 'receipt', label: 'Mess Food Scanner' },
+  { id: '1', icon: 'img:announce', label: 'Announce', badgeCount: 10 },
+  { id: '2', icon: 'img:edu revolution', label: 'Edu-Revolution' },
+  { id: '3', icon: 'img:fee', label: 'Fee Statement' },
+  { id: '4', icon: 'img:attendance', label: 'Attendance', badgeCount: 2 },
+  { id: '5', icon: 'img:mess', label: 'Mess Food Scanner' },
   { id: '6', icon: 'assignment', label: 'Assignments', badgeCount: 1 },
-  { id: '7', icon: 'bar-chart', label: 'Results' },
-  { id: '8', icon: 'menu-book', label: 'Library', badgeCount: 2 },
+  { id: '7', icon: 'img:fee', label: 'Fee Statement' },
+  { id: '8', icon: 'img:attendance', label: 'Attendance', badgeCount: 2 },
   { id: '9', icon: 'receipt', label: 'Events' }
 ];
 
@@ -23,6 +23,12 @@ export default function Categories() {
   const handlePress = (label: string) => {
     if (label === 'Mess Food Scanner') {
       router.push('/HostelMessScanner'); // Your scanner screen
+    } else if (label === 'Edu-Revolution') {
+      console.log(`Clicked on: ${label} - Opening education revolution features`);
+    } else if (label === 'Fee Statement') {
+      console.log(`Clicked on: ${label} - Opening fee statement`);
+    } else if (label === 'Attendance') {
+      console.log(`Clicked on: ${label} - Opening attendance tracker`);
     } else {
       console.log(`Clicked on: ${label}`);
     }
@@ -62,7 +68,8 @@ export default function Categories() {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 10,
-    paddingVertical: 10
+    paddingVertical: 10,
+    backgroundColor: '#fff' // Changed to white background
   },
   headerRow: {
     flexDirection: 'row',

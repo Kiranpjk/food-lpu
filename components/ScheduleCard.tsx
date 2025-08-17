@@ -10,7 +10,7 @@ interface ScheduleCardProps {
   statusText: string;
   statusColor: string;
   time: string;
-  gradientColors: string[];
+  gradientColors: [string, string, string];
 }
 
 export const ScheduleCard: React.FC<ScheduleCardProps> = ({
@@ -23,7 +23,7 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({
 }) => {
   return (
     <LinearGradient
-      colors={gradientColors}
+      colors={gradientColors as any}
       start={{x:0,y:0}}
       end={{x:1,y:0}}
       style={styles.card}

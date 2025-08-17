@@ -1,10 +1,10 @@
-# Copilot Instructions for MyApp
+# Copilot Instructions for Ftouch
 
-Welcome to the MyApp codebase! This document provides essential guidance for AI coding agents to be productive in this project.
+Welcome to the Ftouch codebase! This document provides essential guidance for AI coding agents to be productive in this project.
 
 ## Project Overview
 
-MyApp is an [Expo](https://expo.dev) project created with `create-expo-app`. It uses file-based routing and is structured to support universal app development for Android, iOS, and the web.
+Ftouch is an [Expo](https://expo.dev) project created with `create-expo-app`. It uses file-based routing and is structured to support universal app development for Android, iOS, and the web.
 
 ### Key Directories
 

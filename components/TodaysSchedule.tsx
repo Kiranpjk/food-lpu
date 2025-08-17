@@ -1,28 +1,154 @@
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Font } from "../constants/Typography";
 import { ScheduleCard } from "./ScheduleCard";
 
+interface TimetableEntry {
+  id: number;
+  courseCode: string;
+  courseName: string;
+  roomNumber: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  teacherName?: string;
+  status?: 'present' | 'absent' | 'ongoing';
+}
+
+// Mock timetable data - weekdays only
+const mockTimetableData: TimetableEntry[] = [
+  // Monday (1)
+  { id: 1, courseCode: "PHY109", courseName: "Physics Lab", roomNumber: "55-705", dayOfWeek: 1, startTime: "13:00", endTime: "14:00", teacherName: "Dr. Smith" },
+  { id: 2, courseCode: "CSE101", courseName: "Computer Science Fundamentals", roomNumber: "12-304", dayOfWeek: 1, startTime: "14:00", endTime: "15:00", teacherName: "Prof. Johnson" },
+  
+  // Tuesday (2)
+  { id: 3, courseCode: "MATH201", courseName: "Advanced Mathematics", roomNumber: "22-501", dayOfWeek: 2, startTime: "10:00", endTime: "11:00", teacherName: "Dr. Wilson" },
+  
+  // Wednesday (3)
+  { id: 4, courseCode: "ENG102", courseName: "Technical English", roomNumber: "15-302", dayOfWeek: 3, startTime: "11:00", endTime: "12:00", teacherName: "Ms. Brown" },
+  
+  // Thursday (4)
+  { id: 5, courseCode: "CSE201", courseName: "Data Structures", roomNumber: "12-304", dayOfWeek: 4, startTime: "09:00", endTime: "10:00", teacherName: "Prof. Davis" },
+  
+  // Friday (5)
+  { id: 6, courseCode: "PHY201", courseName: "Quantum Physics", roomNumber: "55-706", dayOfWeek: 5, startTime: "15:00", endTime: "16:00", teacherName: "Dr. Lee" }
+];
+
 export const TodaysSchedule = () => {
-  const scheduleData = [
-    {
-      courseCode: "PHY109",
-      details: "55-705 : LPULive",
-      statusText: "Absent",
-      statusColor: "red",
-      time: "01-02 PM",
-      gradientColors: ["#e47668", "#e59769", "#ffdb79"],
-    },
-    {
-      courseCode: "CSE101",
-      details: "12-304 : LPULive",
-      statusText: "Going On",
-      statusColor: "green",
-      time: "02-03 PM",
-      gradientColors: ["#e47668", "#e59769", "#ffdb79"],
-    },
-  ];
+  const [scheduleData, setScheduleData] = useState<TimetableEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isWeekend, setIsWeekend] = useState(false);
+
+  useEffect(() => {
+    loadTodaysSchedule();
+  }, []);
+
+  const isWeekendDay = (): boolean => {
+    const day = new Date().getDay();
+    return day === 0 || day === 6; // Sunday = 0, Saturday = 6
+  };
+
+  const loadTodaysSchedule = async () => {
+    try {
+      setLoading(true);
+      
+      // Check if it's weekend
+      const weekend = isWeekendDay();
+      setIsWeekend(weekend);
+      
+      if (weekend) {
+        setScheduleData([]);
+      } else {
+        // Get today's classes from mock data
+        const currentDay = new Date().getDay();
+        const todaysClasses = mockTimetableData.filter(entry => entry.dayOfWeek === currentDay);
+        setScheduleData(todaysClasses);
+      }
+    } catch (error) {
+      console.error('Error loading schedule:', error);
+      setScheduleData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatTime = (timeString: string) => {
+    // Convert 24-hour format to 12-hour format
+    const [hours, minutes] = timeString.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
+  const getStatusInfo = (entry: TimetableEntry) => {
+    const currentTime = new Date();
+    const [startHour, startMinute] = entry.startTime.split(':').map(Number);
+    const [endHour, endMinute] = entry.endTime.split(':').map(Number);
+    
+    const startTime = new Date();
+    startTime.setHours(startHour, startMinute, 0, 0);
+    
+    const endTime = new Date();
+    endTime.setHours(endHour, endMinute, 0, 0);
+    
+    if (currentTime >= startTime && currentTime <= endTime) {
+      return { text: "Going On", color: "green" };
+    } else if (currentTime > endTime) {
+      return { text: entry.status === 'present' ? "Present" : "Absent", color: entry.status === 'present' ? "green" : "red" };
+    } else {
+      return { text: "Upcoming", color: "blue" };
+    }
+  };
+
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <View style={styles.messageContainer}>
+          <Text style={styles.messageText}>Loading schedule...</Text>
+        </View>
+      );
+    }
+
+    if (isWeekend) {
+      return (
+        <View style={styles.messageContainer}>
+          <Text style={styles.messageText}>No Timetable Available</Text>
+         
+        </View>
+      );
+    }
+
+    if (scheduleData.length === 0) {
+      return (
+        <View style={styles.messageContainer}>
+          <Text style={styles.messageText}>No classes scheduled for today</Text>
+        </View>
+      );
+    }
+
+    return (
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        {scheduleData.map((item) => {
+          const status = getStatusInfo(item);
+          const timeRange = `${formatTime(item.startTime)}-${formatTime(item.endTime)}`;
+          
+          return (
+            <ScheduleCard 
+              key={item.id}
+              courseCode={item.courseCode}
+              details={`${item.roomNumber} : ${item.courseName}`}
+              statusText={status.text}
+              statusColor={status.color}
+              time={timeRange}
+              gradientColors={["#e47668", "#e59769", "#ffdb79"] as [string, string, string]}
+            />
+          );
+        })}
+      </ScrollView>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -37,11 +163,7 @@ export const TodaysSchedule = () => {
           <Text style={styles.dostText}>Your Dost</Text>
         </LinearGradient>
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {scheduleData.map((item, index) => (
-          <ScheduleCard key={index} {...item} />
-        ))}
-      </ScrollView>
+      {renderContent()}
     </View>
   );
 };
@@ -49,19 +171,19 @@ export const TodaysSchedule = () => {
 const styles = StyleSheet.create({
   container: {
     paddingVertical: 16,
-    paddingLeft: 16,
+    paddingHorizontal: 16, // Changed from paddingLeft to paddingHorizontal for center alignment
+    backgroundColor: '#fff', // Added grey background
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 12,
-    paddingRight: 16,
   },
   title: {
     fontSize: 18,
     fontFamily: Font.bold,
-    color: "#333",
+    color: "#000", // Changed to grey color
   },
   dostBadge: {
     paddingHorizontal: 12,
@@ -74,5 +196,29 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: Font.bold,
     color: '#000',
+  },
+  messageContainer: {
+    paddingHorizontal: 0,
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+   // Added grey background for message container
+    borderWidth: 1,
+    borderColor: '#d8d6d8', // Changed border to grey
+    borderRadius: 8,
+    marginHorizontal: 8, // Added margin for better centering
+  },
+  messageText: {
+    fontSize: 16,
+    fontFamily: Font.bold,
+    color: '#a9a8ab', // Changed to grey color
+    textAlign: 'center',
+  },
+  subMessageText: {
+    fontSize: 14,
+    fontFamily: Font.regular,
+    color: '#888',
+    textAlign: 'center',
+    marginTop: 8,
   },
 });

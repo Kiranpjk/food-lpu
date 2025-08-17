@@ -20,7 +20,7 @@ export default function MessCouponScreen() {
   const router = useRouter();
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top', 'bottom', 'left', 'right']}>      
+    <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>      
       {/* Custom Header */}
       <View style={styles.header}>        
         <TouchableOpacity style={styles.headerIcon} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Go back">
@@ -76,7 +76,7 @@ function InfoItem({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: 'transparent'
+    backgroundColor: '#f0f0f0' // Universal grey safe area
   },
   header: {
     height: 60,
