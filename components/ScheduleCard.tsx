@@ -1,7 +1,6 @@
-import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { Font } from "../constants/Typography";
 
 interface ScheduleCardProps {
@@ -46,12 +45,11 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({
           <Text style={styles.statusText}>{statusText}</Text>
         </View>
         
-        {/* Book Icon Background */}
-        <MaterialIcons 
-          name="menu-book" 
-          size={60} 
-          color="rgba(0,0,0,0.1)" 
-          style={styles.bookIcon}
+        {/* Subtle background image instead of book icon */}
+        <Image
+          source={require('../assets/images/generated-image (1).png')}
+          style={styles.bgImage}
+          resizeMode="contain"
         />
       </View>
 
@@ -66,7 +64,7 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     width: 200,
-    borderRadius: 16,
+    borderRadius: 8, // Reduced border radius
     overflow: "hidden",
     marginRight: 12,
     position: "relative",
@@ -74,10 +72,10 @@ const styles = StyleSheet.create({
   },
   bgImage: {
     position: "absolute",
-    right: 10,
-    top: 10,
-    width: 80,
-    height: 80,
+    right: 5,
+    top: 30,
+    width: 90,
+    height: 90,
     opacity: 0.2,
   },
   content: {

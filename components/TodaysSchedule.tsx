@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Font } from "../constants/Typography";
 import { ScheduleCard } from "./ScheduleCard";
@@ -19,8 +19,8 @@ interface TimetableEntry {
 // Mock timetable data - weekdays only
 const mockTimetableData: TimetableEntry[] = [
   // Monday (1)
-  { id: 1, courseCode: "PHY109", courseName: "Physics Lab", roomNumber: "55-705", dayOfWeek: 1, startTime: "13:00", endTime: "14:00", teacherName: "Dr. Smith" },
-  { id: 2, courseCode: "CSE101", courseName: "Computer Science Fundamentals", roomNumber: "12-304", dayOfWeek: 1, startTime: "14:00", endTime: "15:00", teacherName: "Prof. Johnson" },
+  { id: 1, courseCode: "PHY109", roomNumber: "55-705", dayOfWeek: 1, startTime: "13:00", endTime: "14:00", teacherName: "Dr. Smith" },
+  { id: 2, courseCode: "CSE101", roomNumber: "12-304", dayOfWeek: 1, startTime: "14:00", endTime: "15:00", teacherName: "Prof. Johnson" },
   
   // Tuesday (2)
   { id: 3, courseCode: "MATH201", courseName: "Advanced Mathematics", roomNumber: "22-501", dayOfWeek: 2, startTime: "10:00", endTime: "11:00", teacherName: "Dr. Wilson" },
@@ -73,13 +73,18 @@ export const TodaysSchedule = () => {
     }
   };
 
-  const formatTime = (timeString: string) => {
-    // Convert 24-hour format to 12-hour format
+  // Format time without AM/PM
+  const formatTimeNoPeriod = (timeString: string) => {
     const [hours, minutes] = timeString.split(':');
     const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
     const displayHour = hour % 12 || 12;
-    return `${displayHour}:${minutes} ${ampm}`;
+    return `${displayHour}:${minutes}`;
+  };
+
+  // Get AM/PM for a given time
+  const getPeriod = (timeString: string) => {
+    const hour = parseInt(timeString.split(':')[0]);
+    return hour >= 12 ? 'PM' : 'AM';
   };
 
   const getStatusInfo = (entry: TimetableEntry) => {
@@ -132,13 +137,13 @@ export const TodaysSchedule = () => {
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {scheduleData.map((item) => {
           const status = getStatusInfo(item);
-          const timeRange = `${formatTime(item.startTime)}-${formatTime(item.endTime)}`;
-          
+          const period = getPeriod(item.endTime); // Use end time for AM/PM
+          const timeRange = `${formatTimeNoPeriod(item.startTime)}-${formatTimeNoPeriod(item.endTime)} ${period}`;
           return (
             <ScheduleCard 
               key={item.id}
               courseCode={item.courseCode}
-              details={`${item.roomNumber} : ${item.courseName}`}
+              details={`${item.roomNumber}`}
               statusText={status.text}
               statusColor={status.color}
               time={timeRange}
@@ -153,7 +158,7 @@ export const TodaysSchedule = () => {
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>Today's Schedule</Text>
+        <Text style={styles.title}>Today's Timetable</Text>
         <LinearGradient 
           colors={["#e47668", "#e59769", "#ffdb79"]} 
           start={{x:0,y:0}} 
@@ -186,15 +191,15 @@ const styles = StyleSheet.create({
     color: "#000", // Changed to grey color
   },
   dostBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 5,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 4,
     alignItems: 'center',
     justifyContent: 'center',
   },
   dostText: {
-    fontSize: 12,
-    fontFamily: Font.bold,
+    fontSize: 14,
+    fontFamily: Font.regular,
     color: '#000',
   },
   messageContainer: {
@@ -205,7 +210,7 @@ const styles = StyleSheet.create({
    // Added grey background for message container
     borderWidth: 1,
     borderColor: '#d8d6d8', // Changed border to grey
-    borderRadius: 8,
+    borderRadius: 0,
     marginHorizontal: 8, // Added margin for better centering
   },
   messageText: {

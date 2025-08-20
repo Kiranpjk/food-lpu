@@ -1,6 +1,5 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import React from 'react';
 import { AccessibilityRole, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Font } from '../constants/Typography';
 
@@ -11,6 +10,10 @@ const customImages = {
   fee: require('../assets/images/fee.png'),
   mess: require('../assets/images/mess.png'),
   attendance: require('../assets/images/attendance.png'),
+  assignments: require('../assets/images/assignments.png'),
+  results: require('../assets/images/results.png'),
+  exam: require('../assets/images/exam.png'),
+  events: require('../assets/images/events.png'),
   // Add more custom images here as needed
 };
 
@@ -18,8 +21,8 @@ interface CategoryItemProps {
   /** Icon name. Prefix with `ion:` to use Ionicons, `img:` to use custom image, otherwise MaterialIcons is used. */
   icon: string;
   label: string;
-  /** Optional numeric badge (e.g. unread count). Hidden when 0 or undefined. */
-  badgeCount?: number;
+  /** Optional badge (number or string, e.g. unread count or percentage). Hidden when undefined or empty string. */
+  badgeCount?: number | string;
   /** Optional press handler */
   onPress?: () => void;
   /** Override icon color */
@@ -29,7 +32,7 @@ interface CategoryItemProps {
 }
 
 export default function CategoryItem({ icon, label, badgeCount, onPress, color = '#333', accessibilityLabel }: CategoryItemProps) {
-  const showBadge = typeof badgeCount === 'number' && badgeCount > 0;
+  const showBadge = badgeCount !== undefined && badgeCount !== '';
 
   const renderIcon = () => {
     if (icon.startsWith('ion:')) {
@@ -52,7 +55,7 @@ export default function CategoryItem({ icon, label, badgeCount, onPress, color =
 
   return (
     <TouchableOpacity
-      style={styles.container}
+      style={[styles.container, label === 'Edu-Revolution' && styles.eduContainerBorder]}
       onPress={onPress}
       activeOpacity={0.7}
       accessibilityRole={('button' as AccessibilityRole)}
@@ -75,7 +78,7 @@ export default function CategoryItem({ icon, label, badgeCount, onPress, color =
         </LinearGradient>
       )}
       {/* Label */}
-      <View style={styles.labelContainer}>
+      <View style={[styles.labelContainer, label === 'Edu-Revolution' && styles.eduLabelBorder]}>
         <Text style={styles.label}>{label}</Text>
       </View>
     </TouchableOpacity>
@@ -83,6 +86,10 @@ export default function CategoryItem({ icon, label, badgeCount, onPress, color =
 }
 
 const styles = StyleSheet.create({
+  eduContainerBorder: {
+    borderWidth: 2,
+    borderColor: '#e47668',
+  },
   container: {
     flex: 1,
     aspectRatio: 1, // Makes it a square
@@ -109,28 +116,30 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   customIcon: {
-    width: 70,
-    height: 70,
+    width: 75,
+    height: 75,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -5,
+    marginTop: 0,
+    marginBottom: 20,
   },
-  labelContainer: {
-    position: 'absolute',
-    bottom: 8,
-    left: 8,
-    right: 8,
-    backgroundColor: '#ffce91',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 28
-  },
+      labelContainer: {
+        position: 'absolute',
+        bottom: 8,
+        left: 8,
+        right: 8,
+        backgroundColor: '#ffc890', // Increased opacity
+        paddingHorizontal: 3,
+        paddingVertical: 2,
+        borderRadius: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 23
+      },
+    
   label: {
     fontSize: 12,
-    fontFamily: Font.bold,
+    fontFamily: Font.regular,
     color: '#333',
     textAlign: 'center'
   },
@@ -138,11 +147,11 @@ const styles = StyleSheet.create({
   position: 'absolute',
   top: -8, // move outside the top edge
   right: -8, // move outside the right edge
-  borderRadius: 9,
-  paddingHorizontal: 5,
-  paddingVertical: 1,
+  borderRadius: 5,
+  paddingHorizontal: 8,
+  paddingVertical: 3,
   minWidth: 20,
-  minHeight: 25,
+  minHeight: 20,
   alignItems: 'center',
   justifyContent: 'center',
   elevation: 3,
@@ -155,6 +164,6 @@ const styles = StyleSheet.create({
   badgeText: {
     color: '#000',
     fontSize: 10,
-    fontFamily: Font.bold
+    fontFamily: Font.regular
   }
 });

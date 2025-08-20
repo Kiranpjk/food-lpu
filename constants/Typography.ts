@@ -20,6 +20,7 @@ export const TextStyles = {
     fontFamily: Font.bold,
     fontSize: 22,
     lineHeight: 28,
+    fontWeight: 10,
   },
   subheading: {
     fontFamily: Font.bold,

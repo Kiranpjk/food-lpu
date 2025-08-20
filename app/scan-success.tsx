@@ -22,6 +22,12 @@ const myPhoto = require('../assets/images/photo.jpg');
 export default function ScanSuccessScreen() {
 	const router = useRouter();
 	const params = useLocalSearchParams();
+	// Generate unique 8-digit code starting with 12 for each scan
+	function generateVerificationCode() {
+		const random = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+		return `12${random}`;
+	}
+	const verificationCode = useMemo(() => generateVerificationCode(), []);
 	const {
 		meal = 'Lunch',
 		status = 'valid',
@@ -40,7 +46,7 @@ export default function ScanSuccessScreen() {
 	// State to control sticky header visibility - start with true to show at top
 	const [showStickyHeader, setShowStickyHeader] = useState(true);
 
-	// Timer state for 30-second countdown
+	// Timer state for 300-second countdown
 	const [timeRemaining, setTimeRemaining] = useState(30);
 
 	// Capture timestamp once when opened (unless provided)
@@ -190,7 +196,9 @@ export default function ScanSuccessScreen() {
 						<View style={styles.card}>
 							{/* Timer in top right corner */}
 							<View style={styles.timerCorner}>
-								<Text style={styles.timerText}>{timeRemaining}</Text>
+								{typeof timeRemaining === 'number' && timeRemaining > 0 && (
+									<Text style={styles.timerText}>{timeRemaining}</Text>
+								)}
 							</View>
 							<View style={styles.topRow}>
 								<View style={styles.avatarOutline}>
@@ -199,7 +207,7 @@ export default function ScanSuccessScreen() {
 								<View style={styles.topTextBlock}>
 									<Text style={[styles.meal, { fontFamily: Font.bold }]}>{String(meal).charAt(0).toUpperCase() + String(meal).slice(1)}</Text>
 									<Text style={[styles.id, { fontFamily: Font.bold }]}>{studentId}</Text>
-									<Text style={[styles.name, { fontFamily: Font.bold }]} numberOfLines={1}>{name}</Text>
+									<Text style={[styles.name, { fontFamily: Font.bold }]} numberOfLines={2} ellipsizeMode="tail">{name}</Text>
 									<Text style={[styles.course, { fontFamily:Font.bold }]} numberOfLines={2}>{course}</Text>
 								</View>
 							</View>
@@ -250,7 +258,12 @@ export default function ScanSuccessScreen() {
 								</View>
 								<View style={styles.footerBlock}>
 									<Text style={[styles.footerLabel, { fontFamily: Font.bold }]}>Hostel</Text>
-									<Text style={[styles.footerValue, { fontFamily: Font.regular }]} numberOfLines={1}>{hostel || '—'}</Text>
+									<Text style={[styles.footerValue, { fontFamily: Font.regular }]} numberOfLines={2} ellipsizeMode="tail">{hostel || '—'}</Text>
+								</View>
+	<View style={styles.dividerShadow} />
+								<View style={[styles.footerBlock, styles.verfiyRow]}>
+									<Text style={[styles.name, { fontFamily: Font.bold,fontSize: 25 }]}>Verification Code</Text>
+									<Text style={[styles.name, { fontFamily: Font.bold, color: '#000', fontSize: 25 }]}>{verificationCode}</Text>
 								</View>
 							</View>
 						</View>
@@ -264,6 +277,19 @@ export default function ScanSuccessScreen() {
 
 const styles = StyleSheet.create({
 	backgroundDimmer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.2)' },
+	dividerShadow: {
+		height: 2,
+		marginLeft:-20,
+		backgroundColor: '#c5c5c5',
+		marginVertical: 10,
+		width: '111%',
+		alignSelf: 'stretch',
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 6 },
+		shadowOpacity: 0.5,
+		shadowRadius: 100,
+		elevation: 1.2,
+	},
 	
 	// Movable header inside draggable content
 	movableHeader: { backgroundColor: '#323232' },
@@ -289,12 +315,12 @@ const styles = StyleSheet.create({
 	headerIconBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.12)' },
 	headerClosePlain: { paddingHorizontal: 4, paddingVertical: 4 },
 	headerTitle: { fontSize: 22, color: '#fff', letterSpacing: 0.5, fontFamily: Font.bold },
-	timerText: { fontSize: 14, color: '#fff', fontFamily: Font.bold, backgroundColor: '#6', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, overflow: 'hidden' },
+	timerText: { fontSize: 18, color: '#fff', fontFamily: Font.bold, backgroundColor: '#888', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, overflow: 'hidden', fontWeight: 'bold', letterSpacing: 1 },
 	timerCorner: { position: 'absolute', top: 12, right: 12, zIndex: 10 },
 	mealTimerRow: { flexDirection: 'row', alignItems: 'center' },
 	bodyWrapper: { alignItems: 'center', justifyContent: 'flex-start', backgroundColor: '#FFFFFF', paddingTop: 20 },
 	card: { width: '92%', backgroundColor: '#ffffff', borderRadius: 22, padding: 20, marginTop: 12, elevation: 26, shadowColor: '#000', shadowOpacity: 0.48, shadowOffset: { width: 0, height: 16 }, shadowRadius: 36, borderWidth: 1.5, borderColor: '#bcbebd' },
-	topRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6 },
+	topRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6, justifyContent: 'flex-start' },
 	avatarOutline: { 
 		width: 130, 
 		height: 130, 
@@ -308,10 +334,11 @@ const styles = StyleSheet.create({
 		elevation: 8, 
 		borderWidth: 3, 
 		borderColor: '#000', 
-		backgroundColor: '#fff' 
+		backgroundColor: '#fff',
+		marginLeft: -10
 	},
 	avatar: { width: 124, height: 124, borderRadius: 62, backgroundColor: '#ddd' },
-	topTextBlock: { marginLeft: 16, flexShrink: 1 },
+	topTextBlock: { marginLeft: 6, flexShrink: 1 },
 	meal: { fontSize: 32, color: '#111', fontFamily: Font.bold, textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 2, height: 2 }, textShadowRadius: 4 },
 	id: { marginTop: 4, fontSize: 18, color: '#222', fontFamily: Font.regular, textShadowColor: 'rgba(0,0,0,0.2)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 },
 	name: { marginTop: 2, fontSize: 18, color: '#222', fontFamily: Font.bold, textShadowColor: 'rgba(0,0,0,0.2)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 },
@@ -321,20 +348,35 @@ const styles = StyleSheet.create({
 	dateText: { fontSize: 19, color: '#333', fontFamily: Font.bold },
 	timeText: { fontSize: 19, color: '#333', fontFamily: Font.bold },
 	alertBanner: { marginTop: 20, backgroundColor: '#C62828', padding: 10, borderRadius: 10, elevation: 6, shadowColor: '#000', shadowOpacity: 0.25, shadowOffset: { width: 0, height: 3 }, shadowRadius: 6 },
-	alertBannerText: { fontSize: 34, color: '#a7e222', lineHeight: 34, fontFamily: Font.bold, textAlign: 'center',marginBottom:10 },
-	validationBox: { backgroundColor: 'transparent', borderWidth: 20, borderColor: '#083ccaff', borderRadius: 0, marginTop: 8, marginBottom: 16, marginHorizontal: -20, paddingVertical: 20, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center' },
-	iconArea: { alignItems: 'center', justifyContent: 'center', marginTop: 16,marginBottom: 16 },
+	alertBannerText: { fontSize: 34, color: '#5FBF21', lineHeight: 34, fontFamily: Font.bold, textAlign: 'center',marginBottom:1,marginTop:40 },
+	validationBox: { backgroundColor: 'transparent', borderWidth: 20, borderColor: '#122455', borderRadius: 0, marginTop: 8, marginBottom: 16, marginHorizontal: -20, paddingVertical: 20, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center' },
+	iconArea: { alignItems: 'center', justifyContent: 'center', marginTop: 1,marginBottom: 1 },
 	statusIconCircle: { width: 184, height: 184, borderRadius: 92, alignItems: 'center', justifyContent: 'center', position: 'relative' },
 	greenBox: { backgroundColor: '#0F6D39', borderRadius: 12, padding: 8, alignItems: 'center', justifyContent: 'center' },
 	greenCircle: { width: 120, height: 120, borderRadius: 60, backgroundColor: '#0F6D39', alignItems: 'center', justifyContent: 'center', elevation: 8, shadowColor: '#0F6D39', shadowOpacity: 0.4, shadowOffset: { width: 0, height: 4 }, shadowRadius: 12 },
 	videoContainer: { width: 120, height: 120, borderRadius: 60, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', elevation: 8, shadowColor: '#0F6D39', shadowOpacity: 0.4, shadowOffset: { width: 0, height: 4 }, shadowRadius: 12 },
 	successVideo: { width: 120, height: 120, borderRadius: 60 },
-	gifImage: { width: 200, height: 200 },
+	gifImage: { width: 260, height: 260 },
 	dot: { position: 'absolute', width: 10, height: 10, borderRadius: 5, backgroundColor: '#C62828' },
 	successDot: { position: 'absolute', width: 8, height: 8, borderRadius: 4, backgroundColor: '#0F6D39', opacity: 0.8 },
 	fatherNameSection: { marginTop: 8, paddingTop: 10 },
 	footerSection: { marginTop: 28, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#d7d7d7', paddingTop: 20 },
 	footerBlock: { marginBottom: 16 },
-	footerLabel: { fontSize: 15, color: '#7A7A7A', marginBottom: 4, fontFamily: Font.bold },
-	footerValue: { fontSize: 17, color: '#222', lineHeight: 22, fontFamily: Font.regular }
+	footerLabel: { fontSize: 17, color: '#333', marginBottom: 4, fontFamily: Font.bold },
+	footerValue: { fontSize: 17, color: '#222', lineHeight: 22, fontFamily: Font.regular },
+	verfiyRow: {
+		marginTop: 12,
+		marginBottom: 12,
+		paddingVertical: 9,
+		paddingHorizontal: 45,
+		borderWidth: 3,
+		borderColor: '#000',
+		backgroundColor: '#fff',
+		borderRadius: 10,
+		flexDirection: 'row',
+		alignItems: 'center',
+		marginLeft:-19.5,
+		justifyContent: 'space-between',
+		width: '110.5%'
+	},
 });
