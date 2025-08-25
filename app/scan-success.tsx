@@ -1,14 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
-import { ResizeMode, Video } from 'expo-av';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Dimensions, Image, PanResponder, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Font } from '../constants/Typography';
 import MessCouponScreen from './HostelMessScanner';
 
-// Import the WhatsApp video
-const whatsappVideo = require('../assets/videos/WhatsApp Video 2025-08-13 at 2.50.45 PM (1).mp4');
+// Import the WhatsApp video (using .webm)
+const successVideoSource = require('../assets/videos/document_6138564239528303809.webm');
+const player = useVideoPlayer(successVideoSource, player => {
+	player.loop = true;
+	player.muted = true;
+	player.play();
+});
 
 // Import your photo
 const myPhoto = require('../assets/images/photo.jpg');
@@ -226,22 +231,19 @@ export default function ScanSuccessScreen() {
 									<Text style={[styles.alertBannerText, { fontFamily: Font.bold }]}>Meal Approved</Text>
 								</View>
 							)}
-							{isValid && (
-								<View style={styles.validationBox}>
-									<View style={styles.iconArea}>
-										<Animated.View style={{ transform: [{ scale }] }}>
-											<Video
-												source={whatsappVideo}
-												style={styles.gifImage}
-												resizeMode={ResizeMode.CONTAIN}
-												shouldPlay={true}
-												isLooping={true}
-												isMuted={true}
-											/>
-										</Animated.View>
-									</View>
-								</View>
-							)}
+							 {isValid && (
+								 <View style={styles.validationBox}>
+									 <View style={styles.iconArea}>
+										 <Animated.View style={{ transform: [{ scale }] }}>
+											 <VideoView
+												 player={player}
+												 style={styles.gifImage}
+												 contentFit="contain"
+											 />
+										 </Animated.View>
+									 </View>
+								 </View>
+							 )}
 							{/* Father's Name section moved up */}
 							<View style={styles.fatherNameSection}>
 								<View style={styles.footerBlock}>
