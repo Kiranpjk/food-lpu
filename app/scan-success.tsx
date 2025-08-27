@@ -16,7 +16,7 @@ const player = useVideoPlayer(successVideoSource, player => {
 });
 
 // Import your photo
-const myPhoto = require('../assets/images/photo.jpg');
+const myPhoto = require('../assets/images/profile-pic.jpeg');
 
 /*
 	Scan Success / Result Screen (Mess Pass Layout)
@@ -36,12 +36,12 @@ export default function ScanSuccessScreen() {
 	const {
 		meal = 'Lunch',
 		status = 'valid',
-		name = 'Pybogula Jaya Kiran',
+		name = 'Yesuri Lok Nagendra',
 		studentId = '12305441',
 		course = 'Mess BH-3',
 		session = 'P13AF-L:B.Tech. (Robotics and Automation) [Lateral Entry] (2023)',
-		father = 'Pybogula Shanmuka (9353493116)',
-		mother = 'Pybogula Sowmya (8174425738)',
+		father = 'Yesuri Balayya',
+		mother = 'Yesuri Ramya',
 		hostel = 'Boys Hostel-03-B614-Bed A (Std Non-AC 4 Seater)',
 	} = params as Record<string,string>;
 
@@ -263,10 +263,10 @@ export default function ScanSuccessScreen() {
 									<Text style={[styles.footerValue, { fontFamily: Font.regular }]} numberOfLines={2} ellipsizeMode="tail">{hostel || '—'}</Text>
 								</View>
 	<View style={styles.dividerShadow} />
-								<View style={[styles.footerBlock, styles.verfiyRow]}>
-									<Text style={[styles.name, { fontFamily: Font.bold,fontSize: 25 }]}>Verification Code</Text>
-									<Text style={[styles.name, { fontFamily: Font.bold, color: '#000', fontSize: 25 }]}>{verificationCode}</Text>
-								</View>
+							<View style={[styles.footerBlock, styles.verificationRow]}>
+								<Text style={styles.verificationLabel}>Verification Code</Text>
+								<Text style={styles.verificationValue}>{verificationCode}</Text>
+							</View>
 							</View>
 						</View>
 					</View>
@@ -280,17 +280,11 @@ export default function ScanSuccessScreen() {
 const styles = StyleSheet.create({
 	backgroundDimmer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.2)' },
 	dividerShadow: {
-		height: 2,
-		marginLeft:-20,
+		height: StyleSheet.hairlineWidth * 2,
 		backgroundColor: '#c5c5c5',
-		marginVertical: 10,
-		width: '111%',
+		marginVertical: 12,
 		alignSelf: 'stretch',
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 6 },
-		shadowOpacity: 0.5,
-		shadowRadius: 100,
-		elevation: 1.2,
+		opacity: 0.9,
 	},
 	
 	// Movable header inside draggable content
@@ -366,19 +360,30 @@ const styles = StyleSheet.create({
 	footerBlock: { marginBottom: 16 },
 	footerLabel: { fontSize: 17, color: '#333', marginBottom: 4, fontFamily: Font.bold },
 	footerValue: { fontSize: 17, color: '#222', lineHeight: 22, fontFamily: Font.regular },
-	verfiyRow: {
-		marginTop: 12,
-		marginBottom: 12,
-		paddingVertical: 9,
-		paddingHorizontal: 45,
-		borderWidth: 3,
+	verificationRow: {
+		marginTop: 16,
+		marginBottom: 16,
+		paddingVertical: 10,
+		paddingHorizontal: 16,
+		borderWidth: 2,
 		borderColor: '#000',
 		backgroundColor: '#fff',
-		borderRadius: 10,
+		borderRadius: 12,
 		flexDirection: 'row',
 		alignItems: 'center',
-		marginLeft:-19.5,
 		justifyContent: 'space-between',
-		width: '110.5%'
+		gap: 12,
+	},
+	verificationLabel: {
+		fontFamily: Font.bold,
+		fontSize: Math.min(24, Math.max(18, Dimensions.get('window').width * 0.055)),
+		color: '#111',
+		flexShrink: 1,
+	},
+	verificationValue: {
+		fontFamily: Font.bold,
+		fontSize: Math.min(26, Math.max(20, Dimensions.get('window').width * 0.06)),
+		color: '#000',
+		letterSpacing: 1,
 	},
 });

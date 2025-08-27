@@ -6,13 +6,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Font } from '../constants/Typography';
 
 // Import your photo
-const myPhoto = require('../assets/images/photo.jpg');
+const myPhoto = require('../assets/images/profile-pic.jpeg');
 
 // Static demo data – replace with real user profile data when available
 const PROFILE = {
-  name: 'Pybogula Jaya Kiran',
-  father: 'Pybogula Somanna  (+91 9876543210)',
-  mother: 'Pybogula Lakshmi  (+91 9123456780)',
+  name: 'Yesuri Lok Nagendra',
+  father: 'Yesuri Balayya',
+  mother: 'Yesuri Ramya',
   program: 'B.Tech CSE (AI & ML)  5th Sem  (ID: 12345678)',
   hostel: 'Boys Hostel-03-A614-Bed C (Std Non-AC-4-Seater)',
 //  warning: 'Your hostel confirmation and mess allocation is still pending. Please contact the warden desk to avoid disruption in meals.'
