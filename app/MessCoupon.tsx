@@ -21,16 +21,18 @@ export default function MessCouponScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>      
-      {/* Custom Header */}
-      <View style={styles.header}>        
-        <TouchableOpacity style={styles.headerIcon} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Go back">
-          <Ionicons name="arrow-back" size={24} color="#1a1a1a" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Mess Coupon</Text>
-        <TouchableOpacity onPress={() => router.push('/HostelMessScanner')} accessibilityRole="button" accessibilityLabel="Meal history">
-          <Text style={styles.historyLink}>Meal History</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Custom Header with gradient up to the top */}
+      <LinearGradient colors={["#FF8C3A", "#FFC38A", "#FFE8D6"]} start={{x:0,y:0}} end={{x:1,y:0}} style={styles.headerGradient}>
+        <View style={styles.headerRow}>
+          <TouchableOpacity style={styles.headerIcon} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Go back">
+            <Ionicons name="arrow-back" size={24} color="#1a1a1a" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Mess Coupon</Text>
+          <TouchableOpacity onPress={() => router.push('/meal-history')} accessibilityRole="button" accessibilityLabel="Meal history">
+            <Text style={styles.historyLink}>Meal History</Text>
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Profile / Gradient Card */}
@@ -78,14 +80,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f0f0f0' // Universal grey safe area
   },
-  header: {
+  headerGradient: {
     height: 60,
-    backgroundColor: '#414339',
+  },
+  headerRow: {
+    height: 60,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: 6
+    paddingTop: 6,
   },
   headerIcon: {
     padding: 4

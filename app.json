@@ -1,7 +1,7 @@
 {
   "expo": {
     "assetBundlePatterns": ["**/*"],
-    "name": "Ftouch",
+    "name": "LPUtouch",
     "slug": "myapp",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -13,11 +13,11 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.yourname.ftouch",
+      "package": "com.yourname.lputouch",
       "versionCode": 1,
       "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#ffffff"
       }
     },

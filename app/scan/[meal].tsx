@@ -88,7 +88,11 @@ export default function MealScanScreen() {
     try {
   const data = result.data ?? result?.rawValue ?? JSON.stringify(result);
   // Navigate to result screen (denied example). Change status when backend validates.
-  router.replace({ pathname: '/scan-success', params: { meal, token: encodeURIComponent(data) } } as any);
+  // Repeat detection within 1 minute (any QR)
+  const now = Date.now();
+  const repeat = (globalThis as any).__lastScanAt && (now - (globalThis as any).__lastScanAt < 60_000);
+  (globalThis as any).__lastScanAt = now;
+  router.replace({ pathname: '/scan-success', params: { meal, token: encodeURIComponent(data), repeat: repeat ? '1' : '0' } } as any);
     } catch (e: any) {
       setError(e.message || 'Scan failed');
       setScanned(false);

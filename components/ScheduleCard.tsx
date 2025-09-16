@@ -39,9 +39,9 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({
         <Text style={styles.courseCode}>{courseCode}</Text>
         <Text style={styles.details}>{details}</Text>
 
-        {/* Status */}
-        <View style={styles.statusContainer}>
-          <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
+        {/* Status (dash only) */}
+        <View style={[styles.statusContainer, statusText === '-' ? { backgroundColor: 'transparent', paddingHorizontal: 0 } : null, {width: 20, height: 20}]}>
+          {statusText !== '-' && <View style={[styles.statusDot, { backgroundColor: statusColor }, {width:200,height:200}]} />}
           <Text style={styles.statusText}>{statusText}</Text>
         </View>
         
@@ -131,4 +131,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Font.bold,
   },
+  
 });

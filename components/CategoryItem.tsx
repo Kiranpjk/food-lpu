@@ -33,6 +33,9 @@ interface CategoryItemProps {
 
 export default function CategoryItem({ icon, label, badgeCount, onPress, color = '#333', accessibilityLabel }: CategoryItemProps) {
   const showBadge = badgeCount !== undefined && badgeCount !== '';
+  // Normalize label to catch variants like 'Edu Revolution' vs 'Edu-Revolution'
+  const normalized = label.trim().toLowerCase().replace(/[-_\s]+/g, ' ');
+  const isEduRevolution = normalized === 'edu revolution';
 
   const renderIcon = () => {
     if (icon.startsWith('ion:')) {
@@ -55,7 +58,7 @@ export default function CategoryItem({ icon, label, badgeCount, onPress, color =
 
   return (
     <TouchableOpacity
-      style={[styles.container, label === 'Edu-Revolution' && styles.eduContainerBorder]}
+      style={[styles.container, isEduRevolution && styles.eduContainerBorder]}
       onPress={onPress}
       activeOpacity={0.7}
       accessibilityRole={('button' as AccessibilityRole)}
@@ -78,7 +81,7 @@ export default function CategoryItem({ icon, label, badgeCount, onPress, color =
         </LinearGradient>
       )}
       {/* Label */}
-      <View style={[styles.labelContainer, label === 'Edu-Revolution' && styles.eduLabelBorder]}>
+      <View style={[styles.labelContainer, isEduRevolution && styles.eduLabelBorder]}>
         <Text style={styles.label}>{label}</Text>
       </View>
     </TouchableOpacity>
@@ -88,7 +91,11 @@ export default function CategoryItem({ icon, label, badgeCount, onPress, color =
 const styles = StyleSheet.create({
   eduContainerBorder: {
     borderWidth: 2,
-    borderColor: '#e47668',
+    borderColor: 'rgba(228, 118, 104, 0.8)  ',
+  },
+  eduLabelBorder: {
+    borderWidth: 1.5,
+    borderColor: 'rgba(228, 118, 104, 0.5)',
   },
   container: {
     flex: 1,

@@ -26,8 +26,8 @@ export default function TopBar({ onMenuPress, onNotificationPress, notificationC
         {/* Heading */}
         <Text style={styles.title}>Dashboard</Text>
 
-        {/* Notification Icon with Badge */}
-        <TouchableOpacity style={styles.notificationWrapper} onPress={onNotificationPress}>
+        {/* Notification Icon with Badge (no-op on press) */}
+        <TouchableOpacity style={styles.notificationWrapper}>
           <Ionicons name="notifications-outline" size={28} color="#000" />
           {notificationCount > 0 && (
             <LinearGradient 

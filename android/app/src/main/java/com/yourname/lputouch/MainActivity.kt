@@ -1,4 +1,4 @@
-package com.anonymous.MyApp
+package com.yourname.lputouch
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

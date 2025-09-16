@@ -7,51 +7,63 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Font } from '../constants/Typography';
 import MessCouponScreen from './HostelMessScanner';
 
-// Import the WhatsApp video (using .webm)
-const successVideoSource = require('../assets/videos/document_6138564239528303809.webm');
-const player = useVideoPlayer(successVideoSource, player => {
-	player.loop = true;
-	player.muted = true;
-	player.play();
-});
+// Import videos with proper error handling
+const successVideoSource = require('../assets/videos/success.webm');
+const repeatVideoSource = require('../assets/videos/failure.webm');
 
 // Import your photo
-const myPhoto = require('../assets/images/profile-pic.jpeg');
-
-/*
-	Scan Success / Result Screen (Mess Pass Layout)
-	Fixed header at top, draggable content below
-	Params (via query): meal, status, name, studentId, course, session, father, mother, hostel.
-*/
+const myPhoto = require('../assets/images/photo.jpg');
 
 export default function ScanSuccessScreen() {
 	const router = useRouter();
 	const params = useLocalSearchParams();
-	// Generate unique 8-digit code starting with 12 for each scan
+	
 	function generateVerificationCode() {
 		const random = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
 		return `12${random}`;
 	}
 	const verificationCode = useMemo(() => generateVerificationCode(), []);
+	
 	const {
 		meal = 'Lunch',
 		status = 'valid',
-		name = 'Yesuri Lok Nagendra',
-		studentId = '12305441',
+		name = 'Pybogula Jaya Kiran',
+		studentId = '12305241',
 		course = 'Mess BH-3',
 		session = 'P13AF-L:B.Tech. (Robotics and Automation) [Lateral Entry] (2023)',
-		father = 'Yesuri Balayya',
-		mother = 'Yesuri Ramya',
+		father = 'Pybogula Somanna',
+		mother = 'Pybogula Lakshmi',
 		hostel = 'Boys Hostel-03-B614-Bed A (Std Non-AC 4 Seater)',
+		repeat = '0',
 	} = params as Record<string,string>;
+
+	const isRepeat = String(repeat) === '1' || String(repeat).toLowerCase() === 'true';
+
+	// Choose video based on repeat status with fallback
+	const videoSource = isRepeat ? repeatVideoSource : successVideoSource;
+	
+	// State to track if video failed to load
+	const [videoError, setVideoError] = useState(false);
+
+	// Video player with error handling
+	const player = useVideoPlayer(videoSource, (p) => {
+		try {
+			p.loop = true;
+			p.muted = true;
+			p.play();
+		} catch (error) {
+			console.warn('Video playback error:', error);
+			setVideoError(true);
+		}
+	});
 
 	const isValid = ['valid','success','accepted'].includes(String(status).toLowerCase());
 	const { height: screenHeight } = Dimensions.get('window');
 
-	// State to control sticky header visibility - start with true to show at top
-	const [showStickyHeader, setShowStickyHeader] = useState(true);
+	// State to control sticky header visibility
+	const [showStickyHeader, setShowStickyHeader] = useState(false);
 
-	// Timer state for 300-second countdown
+	// Timer state for 30-second countdown
 	const [timeRemaining, setTimeRemaining] = useState(30);
 
 	// Capture timestamp once when opened (unless provided)
@@ -61,16 +73,31 @@ export default function ScanSuccessScreen() {
 
 	// Animation values
 	const scale = useRef(new Animated.Value(0)).current;
-	const translateY = useRef(new Animated.Value(screenHeight * 0.15)).current; // Start at top position (15% from top)
+	const translateY = useRef(new Animated.Value(screenHeight * 0.4)).current;
+	const opacity = useRef(new Animated.Value(1)).current;
+
+	// Drag to dismiss constants
+	const DISMISS_THRESHOLD_POSITION = screenHeight * 0.9;
+	const DISMISS_THRESHOLD_VELOCITY = 800;
+	const TOP_POSITION = screenHeight * 0.15;
+	const MIDDLE_POSITION = screenHeight * 0.4;
+	const BOTTOM_POSITION = screenHeight * 0.75;
+	const STICKY_THRESHOLD = screenHeight * 0.2;
 
 	useEffect(() => {
 		Animated.spring(scale, { toValue: 1, useNativeDriver: true, friction: 7, tension: 140 }).start();
+		
+		Animated.timing(translateY, {
+			toValue: TOP_POSITION,
+			duration: 400,
+			useNativeDriver: false,
+		}).start();
 	}, [scale]);
 
 	// Monitor translateY changes to control sticky header visibility
 	useEffect(() => {
 		const listener = translateY.addListener(({ value }) => {
-			const shouldShowSticky = value < screenHeight * 0.2;
+			const shouldShowSticky = value <= STICKY_THRESHOLD;
 			if (shouldShowSticky !== showStickyHeader) {
 				setShowStickyHeader(shouldShowSticky);
 			}
@@ -79,9 +106,9 @@ export default function ScanSuccessScreen() {
 		return () => {
 			translateY.removeListener(listener);
 		};
-	}, [translateY, screenHeight, showStickyHeader]);
+	}, [translateY, showStickyHeader]);
 
-	// Timer countdown effect30
+	// Timer countdown effect
 	useEffect(() => {
 		if (timeRemaining > 0) {
 			const timer = setTimeout(() => {
@@ -89,189 +116,274 @@ export default function ScanSuccessScreen() {
 			}, 1000);
 			return () => clearTimeout(timer);
 		} else {
-			// Auto-close when timer reaches 0
 			router.back();
 		}
 	}, [timeRemaining, router]);
 
-	// Pan responder for dragging
+	// Function to dismiss the screen with animation
+	const dismissScreen = () => {
+		Animated.parallel([
+			Animated.timing(translateY, {
+				toValue: screenHeight,
+				duration: 300,
+				useNativeDriver: false,
+			}),
+			Animated.timing(opacity, {
+				toValue: 0,
+				duration: 300,
+				useNativeDriver: false,
+			})
+		]).start(() => {
+			router.back();
+		});
+	};
+
+	// Pan responder for dragging with dismiss functionality
 	const panResponder = useRef(
 		PanResponder.create({
 			onMoveShouldSetPanResponder: (_, gestureState) => {
-				// Only respond to dragging when not scrolling or when scroll is disabled
 				const isVerticalGesture = Math.abs(gestureState.dy) > Math.abs(gestureState.dx);
-				return isVerticalGesture && (!showStickyHeader || Math.abs(gestureState.dy) > 10);
+				return isVerticalGesture && Math.abs(gestureState.dy) > 5;
 			},
 			onPanResponderGrant: () => {
 				translateY.setOffset((translateY as any)._value);
 			},
-			onPanResponderMove: Animated.event(
-				[null, { dy: translateY }],
-				{ useNativeDriver: false }
-			),
+			onPanResponderMove: (_, gestureState) => {
+				const newY = Math.max(TOP_POSITION - (translateY as any)._offset, gestureState.dy);
+				translateY.setValue(newY);
+				
+				const currentPosition = (translateY as any)._offset + newY;
+				if (currentPosition > BOTTOM_POSITION) {
+					const dismissProgress = Math.min((currentPosition - BOTTOM_POSITION) / (DISMISS_THRESHOLD_POSITION - BOTTOM_POSITION), 1);
+					opacity.setValue(1 - (dismissProgress * 0.6));
+				} else {
+					opacity.setValue(1);
+				}
+			},
 			onPanResponderRelease: (_, gestureState) => {
 				translateY.flattenOffset();
+				const currentY = (translateY as any)._value;
+				const velocity = gestureState.vy;
 				
-				// Snap to positions based on gesture
-				const snapThreshold = screenHeight * 0.1;
-				let snapToY = (translateY as any)._value;
+				const shouldDismissByPosition = currentY >= DISMISS_THRESHOLD_POSITION;
+				const shouldDismissByVelocity = velocity > DISMISS_THRESHOLD_VELOCITY && currentY > MIDDLE_POSITION;
 				
-				if (gestureState.dy < -snapThreshold) {
-					snapToY = screenHeight * 0.15; // Snap to top (below fixed header)
-				} else if (gestureState.dy > snapThreshold) {
-					snapToY = screenHeight * 0.6; // Snap to bottom
-				} else {
-					snapToY = screenHeight * 0.3; // Snap to middle
+				if (shouldDismissByPosition || shouldDismissByVelocity) {
+					dismissScreen();
+					return;
 				}
 				
-				// Update sticky header visibility based on final position
-				setShowStickyHeader(snapToY < screenHeight * 0.2);
+				Animated.timing(opacity, {
+					toValue: 1,
+					duration: 200,
+					useNativeDriver: false,
+				}).start();
+				
+				let snapToY;
+				
+				if (velocity < -300) {
+					snapToY = TOP_POSITION;
+				} else if (velocity > 300) {
+					if (currentY > MIDDLE_POSITION) {
+						snapToY = BOTTOM_POSITION;
+					} else {
+						snapToY = MIDDLE_POSITION;
+					}
+				} else {
+					const distanceToTop = Math.abs(currentY - TOP_POSITION);
+					const distanceToMiddle = Math.abs(currentY - MIDDLE_POSITION);
+					const distanceToBottom = Math.abs(currentY - BOTTOM_POSITION);
+					
+					const minDistance = Math.min(distanceToTop, distanceToMiddle, distanceToBottom);
+					
+					if (minDistance === distanceToTop) {
+						snapToY = TOP_POSITION;
+					} else if (minDistance === distanceToMiddle) {
+						snapToY = MIDDLE_POSITION;
+					} else {
+						snapToY = BOTTOM_POSITION;
+					}
+				}
+				
+				setShowStickyHeader(snapToY <= STICKY_THRESHOLD);
 				
 				Animated.spring(translateY, {
 					toValue: snapToY,
 					useNativeDriver: false,
+					friction: 8,
+					tension: 100,
 				}).start();
 			},
 		})
 	).current;
 
+	// Fallback component when video fails
+	const VideoFallback = ({ isRepeat }: { isRepeat: boolean }) => (
+		<View style={styles.videoFallback}>
+			<View style={[
+				styles.fallbackCircle,
+				isRepeat ? styles.fallbackCircleError : styles.fallbackCircleSuccess
+			]}>
+				<Ionicons 
+					name={isRepeat ? "close-circle" : "checkmark-circle"} 
+					size={120} 
+					color={isRepeat ? "#C62828" : "#0F6D39"} 
+				/>
+			</View>
+		</View>
+	);
+
 	return (
 		<SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
 			<View style={{ flex: 1 }}>
-				{/* Background - HostelMessScanner page will be visible here */}
 				<MessCouponScreen />
-				<View style={styles.backgroundDimmer} />
+				<Animated.View style={[styles.backgroundDimmer, { opacity }]} />
 			
-			{/* Draggable content area - entire area is draggable */}
-			<Animated.View 
-				style={[
-					styles.draggableContent,
-					{
-						transform: showStickyHeader ? [] : [{ translateY }],
-						...(showStickyHeader ? {
-							position: 'absolute',
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
-							transform: []
-						} : {})
-					}
-				]}
-				{...panResponder.panHandlers}
-			>
-				{/* Header inside draggable area */}
-				<View style={[
-					styles.movableHeader,
-					showStickyHeader ? { backgroundColor: '#323232' } : { backgroundColor: '#323232' }
-				]}>
-					{/* Black overlay for safe area when at top */}
-					{showStickyHeader && (
-						<View style={styles.safeAreaBlackOverlay}>
-							{/* Drag bar positioned in black area */}
-							
-						</View>
-					)}
-					<View style={[
-						styles.headerBar,
-						// Reduced padding when sticky since drag bar is in black area
-						showStickyHeader ? { paddingTop: 15 } : { paddingTop: 5 }
-					]}>
-						<View style={styles.headerSpacer} />
-						<View style={styles.titleContainer}>
-							{/* Show drag bar here only when not sticky */}
-							<View style={styles.dragHandle}>
-								<View style={styles.dragBar} />
-							</View>
-							<Text style={[styles.headerTitle, { fontFamily: Font.bold }]}>Mess Pass</Text>
-						</View>
-						<TouchableOpacity onPress={() => router.replace('/HostelMessScanner')} style={styles.headerClosePlain} accessibilityLabel="Close">
-							<Ionicons name="close" size={26} color="#fff" />
-						</TouchableOpacity>
-					</View>
-				</View>
-
-				{/* Scrollable content area - scrollable when header touches safe area */}
-				<ScrollView 
-					style={styles.scrollableArea} 
-					showsVerticalScrollIndicator={false}
-					scrollEnabled={showStickyHeader}
+				<Animated.View 
+					style={[
+						styles.draggableContent,
+						{
+							opacity,
+							transform: showStickyHeader ? [] : [{ translateY }],
+							...(showStickyHeader ? {
+								position: 'absolute',
+								top: 0,
+								left: 0,
+								right: 0,
+								bottom: 0,
+								transform: []
+							} : {})
+						}
+					]}
+					{...panResponder.panHandlers}
 				>
-					<View style={styles.bodyWrapper}>
-						<View style={styles.card}>
-							{/* Timer in top right corner */}
-							<View style={styles.timerCorner}>
-								{typeof timeRemaining === 'number' && timeRemaining > 0 && (
-									<Text style={styles.timerText}>{timeRemaining}</Text>
-								)}
+					<View style={[
+						styles.movableHeader,
+						showStickyHeader ? { backgroundColor: '#323232' } : { backgroundColor: '#323232' }
+					]}>
+						{showStickyHeader && (
+							<View style={styles.safeAreaBlackOverlay}>
 							</View>
-							<View style={styles.topRow}>
-								<View style={styles.avatarOutline}>
-									<Image source={myPhoto} style={styles.avatar} />
+						)}
+						<View style={[
+							styles.headerBar,
+							showStickyHeader ? { paddingTop: 15 } : { paddingTop: 5 }
+						]}>
+							<View style={styles.headerSpacer} />
+							<View style={styles.titleContainer}>
+								<View style={styles.dragHandle}>
+									<View style={styles.dragBar} />
 								</View>
-								<View style={styles.topTextBlock}>
-									<Text style={[styles.meal, { fontFamily: Font.bold }]}>{String(meal).charAt(0).toUpperCase() + String(meal).slice(1)}</Text>
-									<Text style={[styles.id, { fontFamily: Font.bold }]}>{studentId}</Text>
-									<Text style={[styles.name, { fontFamily: Font.bold }]} numberOfLines={2} ellipsizeMode="tail">{name}</Text>
-									<Text style={[styles.course, { fontFamily:Font.bold }]} numberOfLines={2}>{course}</Text>
-								</View>
+								<Text style={[styles.headerTitle, { fontFamily: Font.bold }]}>Mess Pass</Text>
 							</View>
-							<Text style={[styles.sessionLine, { fontFamily: Font.bold }]} numberOfLines={2}>{session}</Text>
-							<View style={styles.dateTimeRow}>
-								<Text style={[styles.dateText, { fontFamily: Font.bold }]}>{dateStr}</Text>
-								<Text style={[styles.timeText, { fontFamily: Font.bold }]}>{timeStr}</Text>
-							</View>
-							{!isValid && (
-								<View style={styles.alertBanner}>
-									<Text style={[styles.alertBannerText, { fontFamily: Font.bold }]}>Dear Student, This mess is not allocated to you. Please report to your concerned Hostel Warden.</Text>
-								</View>
-							)}
-							{isValid && (
-								<View > 
-									<Text style={[styles.alertBannerText, { fontFamily: Font.bold }]}>Meal Approved</Text>
-								</View>
-							)}
-							 {isValid && (
-								 <View style={styles.validationBox}>
-									 <View style={styles.iconArea}>
-										 <Animated.View style={{ transform: [{ scale }] }}>
-											 <VideoView
-												 player={player}
-												 style={styles.gifImage}
-												 contentFit="contain"
-											 />
-										 </Animated.View>
-									 </View>
-								 </View>
-							 )}
-							{/* Father's Name section moved up */}
-							<View style={styles.fatherNameSection}>
-								<View style={styles.footerBlock}>
-									<Text style={[styles.footerLabel, { fontFamily: Font.bold }]}>Father's Name</Text>
-									<Text style={[styles.footerValue, { fontFamily: Font.regular }]} numberOfLines={1}>{father}</Text>
-								</View>
-								<View style={styles.footerBlock}>
-									<Text style={[styles.footerLabel, { fontFamily: Font.bold }]}>Mother's Name</Text>
-									<Text style={[styles.footerValue, { fontFamily: Font.regular }]} numberOfLines={1}>{mother}</Text>
-								</View>
-								<View style={styles.footerBlock}>
-									<Text style={[styles.footerLabel, { fontFamily: Font.bold }]}>Session</Text>
-									<Text style={[styles.footerValue, { fontFamily: Font.regular }]} numberOfLines={2}>{session}</Text>
-								</View>
-								<View style={styles.footerBlock}>
-									<Text style={[styles.footerLabel, { fontFamily: Font.bold }]}>Hostel</Text>
-									<Text style={[styles.footerValue, { fontFamily: Font.regular }]} numberOfLines={2} ellipsizeMode="tail">{hostel || '—'}</Text>
-								</View>
-	<View style={styles.dividerShadow} />
-							<View style={[styles.footerBlock, styles.verificationRow]}>
-								<Text style={styles.verificationLabel}>Verification Code</Text>
-								<Text style={styles.verificationValue}>{verificationCode}</Text>
-							</View>
-							</View>
+							<TouchableOpacity onPress={() => router.replace('/HostelMessScanner')} style={styles.headerClosePlain} accessibilityLabel="Close">
+								<Ionicons name="close" size={26} color="#fff" />
+							</TouchableOpacity>
 						</View>
 					</View>
-				</ScrollView>
-			</Animated.View>
+
+					<ScrollView 
+						style={styles.scrollableArea} 
+						showsVerticalScrollIndicator={false}
+						scrollEnabled={showStickyHeader}
+					>
+						<View style={styles.bodyWrapper}>
+							<View style={styles.card}>
+								<View style={styles.timerCorner}>
+									{typeof timeRemaining === 'number' && timeRemaining > 0 && (
+										<Text style={styles.timerText}>{timeRemaining}</Text>
+									)}
+								</View>
+								<View style={styles.topRow}>
+									<View style={styles.avatarOutline}>
+										<Image source={myPhoto} style={styles.avatar} />
+									</View>
+									<View style={styles.topTextBlock}>
+										<Text style={[styles.meal, { fontFamily: Font.bold }]}>{String(meal).charAt(0).toUpperCase() + String(meal).slice(1)}</Text>
+										<Text style={[styles.id, { fontFamily: Font.bold }]}>{studentId}</Text>
+										<Text style={[styles.name, { fontFamily: Font.bold }]} numberOfLines={2} ellipsizeMode="tail">{name}</Text>
+										<Text style={[styles.course, { fontFamily:Font.bold }]} numberOfLines={2}>{course}</Text>
+									</View>
+								</View>
+								<Text style={[styles.sessionLine, { fontFamily: Font.bold }]} numberOfLines={2}>{session}</Text>
+								<View style={styles.dateTimeRow}>
+									<Text style={[styles.dateText, { fontFamily: Font.bold }]}>{dateStr}</Text>
+									<Text style={[styles.timeText, { fontFamily: Font.bold }]}>{timeStr}</Text>
+								</View>
+								{!isValid && (
+									<View style={styles.alertBanner}>
+										<Text style={[styles.alertBannerText, { fontFamily: Font.bold }]}>Dear Student, This mess is not allocated to you. Please report to your concerned Hostel Warden.</Text>
+									</View>
+								)}
+								{isValid && !isRepeat && (
+									<View > 
+										<Text style={[styles.alertBannerText, { fontFamily: Font.bold }]}>Meal Approved</Text>
+									</View>
+								)}
+								{isValid && isRepeat && (
+									<View>
+										<Text style={[styles.alertBannerTextRepeat, { fontFamily: Font.bold }]}>You have Already Taken this Meal</Text>
+									</View>
+								)}
+								{isValid && (
+									<View style={[
+										styles.validationBox,
+										isRepeat ? styles.validationBoxRepeat : null,
+									]}>
+										<View style={styles.iconArea}>
+											<Animated.View style={{ transform: [{ scale }] }}>
+												{videoError ? (
+													<VideoFallback isRepeat={isRepeat} />
+												) : (
+													<VideoView
+														player={player}
+														style={styles.gifImage}
+														contentFit="contain"
+														nativeControls={false}
+														allowsFullscreen={false}
+														allowsPictureInPicture={false}
+														requiresLinearPlayback={false}
+														onError={(error) => {
+															console.warn('VideoView error:', error);
+															setVideoError(true);
+														}}
+													/>
+												)}
+											</Animated.View>
+										</View>
+									</View>
+								)}
+								<View style={styles.fatherNameSection}>
+									<View style={styles.footerBlock}>
+										<Text style={[styles.footerLabel, { fontFamily: Font.bold }]}>Father's Name</Text>
+										<Text style={[styles.footerValue, { fontFamily: Font.regular }]} numberOfLines={1}>{father}</Text>
+									</View>
+									<View style={styles.footerBlock}>
+										<Text style={[styles.footerLabel, { fontFamily: Font.bold }]}>Mother's Name</Text>
+										<Text style={[styles.footerValue, { fontFamily: Font.regular }]} numberOfLines={1}>{mother}</Text>
+									</View>
+									<View style={styles.footerBlock}>
+										<Text style={[styles.footerLabel, { fontFamily: Font.bold }]}>Session</Text>
+										<Text style={[styles.footerValue, { fontFamily: Font.regular }]} numberOfLines={2}>{session}</Text>
+									</View>
+									<View style={styles.footerBlock}>
+										<Text style={[styles.footerLabel, { fontFamily: Font.bold }]}>Hostel</Text>
+										<Text style={[styles.footerValue, { fontFamily: Font.regular }]} numberOfLines={2} ellipsizeMode="tail">{hostel || '—'}</Text>
+									</View>
+									{!isRepeat && (
+										<>
+											<View style={styles.dividerShadow} />
+											<View style={[styles.footerBlock, styles.verificationRow]}>
+												<Text style={styles.verificationLabel}>Verification Code</Text>
+												<Text style={styles.verificationValue}>{verificationCode}</Text>
+											</View>
+										</>
+									)}
+								</View>
+							</View>
+						</View>
+					</ScrollView>
+				</Animated.View>
 			</View>
 		</SafeAreaView>
 	);
@@ -345,7 +457,9 @@ const styles = StyleSheet.create({
 	timeText: { fontSize: 19, color: '#333', fontFamily: Font.bold },
 	alertBanner: { marginTop: 20, backgroundColor: '#C62828', padding: 10, borderRadius: 10, elevation: 6, shadowColor: '#000', shadowOpacity: 0.25, shadowOffset: { width: 0, height: 3 }, shadowRadius: 6 },
 	alertBannerText: { fontSize: 34, color: '#5FBF21', lineHeight: 34, fontFamily: Font.bold, textAlign: 'center',marginBottom:1,marginTop:40 },
+	alertBannerTextRepeat: { fontSize: 28, color: '#C62828', lineHeight: 32, fontFamily: Font.bold, textAlign: 'center', marginTop: 40, marginBottom: 1 },
 	validationBox: { backgroundColor: 'transparent', borderWidth: 20, borderColor: '#122455', borderRadius: 0, marginTop: 8, marginBottom: 16, marginHorizontal: -20, paddingVertical: 20, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center' },
+	validationBoxRepeat: { borderColor: '#C62828' },
 	iconArea: { alignItems: 'center', justifyContent: 'center', marginTop: 1,marginBottom: 1 },
 	statusIconCircle: { width: 184, height: 184, borderRadius: 92, alignItems: 'center', justifyContent: 'center', position: 'relative' },
 	greenBox: { backgroundColor: '#0F6D39', borderRadius: 12, padding: 8, alignItems: 'center', justifyContent: 'center' },
@@ -353,6 +467,32 @@ const styles = StyleSheet.create({
 	videoContainer: { width: 120, height: 120, borderRadius: 60, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', elevation: 8, shadowColor: '#0F6D39', shadowOpacity: 0.4, shadowOffset: { width: 0, height: 4 }, shadowRadius: 12 },
 	successVideo: { width: 120, height: 120, borderRadius: 60 },
 	gifImage: { width: 260, height: 260 },
+	// New styles for video fallback
+	videoFallback: {
+		width: 260,
+		height: 260,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	fallbackCircle: {
+		width: 200,
+		height: 200,
+		borderRadius: 100,
+		alignItems: 'center',
+		justifyContent: 'center',
+		elevation: 8,
+		shadowOffset: { width: 0, height: 4 },
+		shadowRadius: 12,
+		shadowOpacity: 0.4,
+	},
+	fallbackCircleSuccess: {
+		backgroundColor: '#0F6D39',
+		shadowColor: '#0F6D39',
+	},
+	fallbackCircleError: {
+		backgroundColor: '#C62828',
+		shadowColor: '#C62828',
+	},
 	dot: { position: 'absolute', width: 10, height: 10, borderRadius: 5, backgroundColor: '#C62828' },
 	successDot: { position: 'absolute', width: 8, height: 8, borderRadius: 4, backgroundColor: '#0F6D39', opacity: 0.8 },
 	fatherNameSection: { marginTop: 8, paddingTop: 10 },

@@ -6,15 +6,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Font } from '../constants/Typography';
 
 // Import your photo
-const myPhoto = require('../assets/images/profile-pic.jpeg');
+const myPhoto = require('../assets/images/photo.jpg');
 
 // Static demo data – replace with real user profile data when available
 const PROFILE = {
-  name: 'Yesuri Lok Nagendra',
-  father: 'Yesuri Balayya',
-  mother: 'Yesuri Ramya',
+  name: 'Pybogula Jaya Kiran',
+  father: 'Pybogula Somanna',
+  mother: 'Pybogula Laksmi',
   program: 'B.Tech CSE (AI & ML)  5th Sem  (ID: 12345678)',
-  hostel: 'Boys Hostel-03-A614-Bed C (Std Non-AC-4-Seater)',
+  hostel: 'Boys Hostel-03-A914-Bed C (Std Non-AC-4-Seater)',
 //  warning: 'Your hostel confirmation and mess allocation is still pending. Please contact the warden desk to avoid disruption in meals.'
 };
 
@@ -31,7 +31,7 @@ export default function MessCouponScreen() {
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Mess Coupon</Text>
-        <TouchableOpacity onPress={() => router.push('/HostelMessScanner')} accessibilityRole="button" accessibilityLabel="Meal history">
+        <TouchableOpacity onPress={() => router.push('/meal-history')} accessibilityRole="button" accessibilityLabel="Meal history">
           <Text style={styles.historyLink}>Meal History</Text>
         </TouchableOpacity>
       </View>

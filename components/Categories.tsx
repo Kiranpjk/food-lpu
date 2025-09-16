@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { Font } from '../constants/Typography';
 import CategoryItem from './CategoryItem';
 
@@ -25,7 +25,7 @@ export default function Categories() {
   const handlePress = (label: string) => {
     if (label === 'Mess Food Scanner') {
       router.push('/HostelMessScanner'); // Your scanner screen
-    } else if (label === 'Edu-Revolution') {
+    } else if (label === 'Edu Revolution') {
       console.log(`Clicked on: ${label} - Opening education revolution features`);
     } else if (label === 'Fee Statement') {
       console.log(`Clicked on: ${label} - Opening fee statement`);
@@ -67,7 +67,14 @@ export default function Categories() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create<{ 
+  container: ViewStyle;
+  headerRow: ViewStyle;
+  title: TextStyle;
+  addButton: ViewStyle;
+  subtitle: TextStyle;
+  row: ViewStyle;
+}>({
   container: {
     paddingHorizontal: 10,
     paddingVertical: 10,
@@ -82,7 +89,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: Font.bold,
     color: '#333',
-    fontWeight:10
+    fontWeight: '700'
   },
   addButton: {
     width: 32,

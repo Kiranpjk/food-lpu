@@ -7,7 +7,7 @@ import { ScheduleCard } from "./ScheduleCard";
 interface TimetableEntry {
   id: number;
   courseCode: string;
-  courseName: string;
+  courseName?: string;
   roomNumber: string;
   dayOfWeek: number;
   startTime: string;
@@ -19,20 +19,20 @@ interface TimetableEntry {
 // Mock timetable data - weekdays only
 const mockTimetableData: TimetableEntry[] = [
   // Monday (1)
-  { id: 1, courseCode: "PHY109", roomNumber: "55-705", dayOfWeek: 1, startTime: "13:00", endTime: "14:00", teacherName: "Dr. Smith" },
-  { id: 2, courseCode: "CSE101", roomNumber: "12-304", dayOfWeek: 1, startTime: "14:00", endTime: "15:00", teacherName: "Prof. Johnson" },
+  { id: 1, courseCode: "PHY109", roomNumber: "55-705", dayOfWeek: 1, startTime: "13", endTime: "14", teacherName: "Dr. Smith" },
+  { id: 2, courseCode: "CSE101", roomNumber: "12-304", dayOfWeek: 1, startTime: "14", endTime: "15", teacherName: "Prof. Johnson" },
   
   // Tuesday (2)
-  { id: 3, courseCode: "MATH201", courseName: "Advanced Mathematics", roomNumber: "22-501", dayOfWeek: 2, startTime: "10:00", endTime: "11:00", teacherName: "Dr. Wilson" },
+  { id: 3, courseCode: "MATH201", courseName: "Advanced Mathematics", roomNumber: "22-501", dayOfWeek: 2, startTime: "10", endTime: "11", teacherName: "Dr. Wilson" },
   
   // Wednesday (3)
-  { id: 4, courseCode: "ENG102", courseName: "Technical English", roomNumber: "15-302", dayOfWeek: 3, startTime: "11:00", endTime: "12:00", teacherName: "Ms. Brown" },
+  { id: 4, courseCode: "ENG102", courseName: "Technical English", roomNumber: "15-302", dayOfWeek: 3, startTime: "11", endTime: "12", teacherName: "Ms. Brown" },
   
   // Thursday (4)
-  { id: 5, courseCode: "CSE201", courseName: "Data Structures", roomNumber: "12-304", dayOfWeek: 4, startTime: "09:00", endTime: "10:00", teacherName: "Prof. Davis" },
+  { id: 5, courseCode: "CSE201", courseName: "Data Structures", roomNumber: "12-304", dayOfWeek: 4, startTime: "09", endTime: "10", teacherName: "Prof. Davis" },
   
   // Friday (5)
-  { id: 6, courseCode: "PHY201", courseName: "Quantum Physics", roomNumber: "55-706", dayOfWeek: 5, startTime: "15:00", endTime: "16:00", teacherName: "Dr. Lee" }
+  { id: 6, courseCode: "PHY201", courseName: "Quantum Physics", roomNumber: "55-706", dayOfWeek: 5, startTime: "15", endTime: "16", teacherName: "Dr. Lee" }
 ];
 
 export const TodaysSchedule = () => {
@@ -78,7 +78,7 @@ export const TodaysSchedule = () => {
     const [hours, minutes] = timeString.split(':');
     const hour = parseInt(hours);
     const displayHour = hour % 12 || 12;
-    return `${displayHour}:${minutes}`;
+    return `${displayHour}`;
   };
 
   // Get AM/PM for a given time
@@ -136,7 +136,8 @@ export const TodaysSchedule = () => {
     return (
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {scheduleData.map((item) => {
-          const status = getStatusInfo(item);
+          // Replace status label with a simple dash '-'
+          const status = { text: '-', color: 'transparent', fontSize: 12, fontWeight: 200, width: 20, height: 20 } as const;
           const period = getPeriod(item.endTime); // Use end time for AM/PM
           const timeRange = `${formatTimeNoPeriod(item.startTime)}-${formatTimeNoPeriod(item.endTime)} ${period}`;
           return (
